@@ -6,8 +6,26 @@ var thedata = {};
 $(document).ready(function() {
     
     $.support.cors = true;
-    $.getJSON(sodaUrl)
+    
+    /* Working on making this a "loading X records" message....
+    
+    
+    $.getJSON(sodaURL, {
+        $select = "sum(DOCUMENT_TYPE)",
+        $group = "DOCUMENT_TYPE"
+    }).done(function(data) {
+        
+        
+    });
+    */
+    
+    
+    $.getJSON(sodaUrl, {
+        $limit: "10000"
+    })
     .done(function(data) {
+        
+        $("#introText").remove();
         
         thedata = data;
         
