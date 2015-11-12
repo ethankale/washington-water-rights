@@ -35,6 +35,8 @@ $(document).ready(function() {
         var max = 0;
         var numberOfCounties = counties.length;
         
+        // Get the maximum value of applications per county, to
+        //   appropriately set the numeric axis
         for (var countyidex in counties) {
             var countyName = counties[countyidex].county_name;
             var currentCount = countyCounts[countyName];
@@ -48,24 +50,24 @@ $(document).ready(function() {
         
         counties = _.sortBy(counties, 'count').reverse();
         
-        var margin = {top: 20, right: 20, bottom: 200, left: 40},
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-
-        var x = d3.scale.ordinal()
-            .rangeRoundBands([0, width], .1);
+        var margin = {top: 40, right: 20, bottom: 20, left: 200},
+            width = 500 - margin.left - margin.right,
+            height = 700 - margin.top - margin.bottom;
             
-        var y = d3.scale.linear()
-            .range([height, 0]);
+        var x = d3.scale.linear()
+            .range([0, width]);
 
+        var y = d3.scale.ordinal()
+            .rangeRoundBands([0, height]);
+            
         var xAxis = d3.svg.axis()
             .scale(x)
-            .orient("bottom");
+            .orient("bottom")
+            .ticks(10);
 
         var yAxis = d3.svg.axis()
             .scale(y)
-            .orient("left")
-            .ticks(10);
+            .orient("left");
             
         var svg = d3.select("body").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -73,8 +75,12 @@ $(document).ready(function() {
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         
-        x.domain(counties.map(function(d) { return d.county_name; }));
-        y.domain([0, d3.max(counties, function(d) { return d.count; })]);
+        x.domain([0, d3.max(counties, function(d) { return d.count; })]);
+        y.domain(counties.map(function(d) { return d.county_name; }));
+        
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
         
         svg.append("g")
             .attr("class", "x axis")
@@ -83,27 +89,16 @@ $(document).ready(function() {
             .selectAll("text")  
                 .style("text-anchor", "end")
                 .attr("dx", "-.8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-65)" );
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-          .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("Y Axis!");
+                .attr("dy", ".15em");
 
         svg.selectAll(".bar")
             .data(counties)
           .enter().append("rect")
             .attr("class", "bar")
-            .attr("x", function(d) { return x(d.county_name); })
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) { return y(d.count); })
-            .attr("height", function(d) { return height - y(d.count); });
+            .attr("x", 0)
+            .attr("width", function(d) { return x(d.count); })
+            .attr("y", function(d) { return y(d.county_name); })
+            .attr("height", 10);
               
     });
 });
