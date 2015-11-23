@@ -3,6 +3,8 @@ var sodaUrl = "https://data.wa.gov/resource/xc42-c7rk.json";
 
 var thedata = {};
 
+var counties = 
+
 $(document).ready(function() {
     
     $.support.cors = true;
@@ -50,9 +52,16 @@ $(document).ready(function() {
         
         counties = _.sortBy(counties, 'count').reverse();
         
+        // Set up the graphing area and axes
         var margin = {top: 40, right: 20, bottom: 20, left: 200},
             width = 500 - margin.left - margin.right,
             height = 700 - margin.top - margin.bottom;
+        
+        var marginMap = {top: 20, right: 20, bottom: 20, left: 20},
+            paddingMap = 3,
+            heightMap = 500 - margin.top - margin.bottom,
+            widthMap = 500 - margin.left - margin.right,
+            squareSide = (heightMap / 8) - paddingMap;
             
         var x = d3.scale.linear()
             .range([0, width]);
@@ -68,7 +77,30 @@ $(document).ready(function() {
         var yAxis = d3.svg.axis()
             .scale(y)
             .orient("left");
+        
+        
+        var svgmap = d3.select("body").append("svg")
+            .attr("width", widthMap + margin.left + margin.right)
+            .attr("height", heightMap + marginMap.top + marginMap.bottom)
+          .append("g")
+            .attr("transform", "translate(" + marginMap.left + "," + marginMap.top + ")");
             
+        // Add the map of square WA counties
+        svgmap.selectAll(".square")
+            .data(countiesSquare)
+          .enter().append("rect")
+            .attr("class", "square")
+            .attr("x", function(d) { return d.x * squareSide })
+            .attr("width", function(d) { return squareSide - paddingMap })
+            .attr("y", function(d) { return d.y * squareSide })
+            .attr("height", function(d) { return squareSide - paddingMap });
+            
+        
+        // Add an element so the SVGs display stacked vertically,
+        //  not next to each other
+        d3.select("body").append("br");
+        
+        
         var svg = d3.select("body").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -98,7 +130,7 @@ $(document).ready(function() {
             .attr("x", 0)
             .attr("width", function(d) { return x(d.count); })
             .attr("y", function(d) { return y(d.county_name); })
-            .attr("height", 10);
+            .attr("height", y.rangeBand() * 0.8);
               
     });
 });
